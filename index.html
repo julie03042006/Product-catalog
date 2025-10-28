@@ -1,214 +1,328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Product Catalog with Filters</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: "Poppins", sans-serif;
-            margin: 0;
-            background: #f4f4f9;
-            color: #333;
+            box-sizing: border-box;
         }
         
-        header {
-            background-color: #3f51b5;
-            color: white;
-            padding: 1rem 2rem;
-            text-align: center;
-        }
-        
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        select,
-        input[type="range"],
-        input[type="text"] {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            padding: 2rem;
+        .filter-button.active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
         .product-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
         
-        .product-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
         
-        .product-info {
-            padding: 1rem;
-            text-align: center;
-        }
-        
-        .product-info h3 {
-            margin: 0.5rem 0;
-            font-size: 1.2rem;
-        }
-        
-        .product-info p {
-            margin: 0.3rem 0;
-            color: #666;
-        }
-        
-        .price {
-            color: #3f51b5;
-            font-weight: bold;
-        }
-        
-        @media (max-width: 600px) {
-            .filters {
-                flex-direction: column;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
 </head>
 
-<body>
-
-    <header>
-        <h1>🛍 Product Catalog with Filters</h1>
-    </header>
-
-    <div class="filters">
-        <input type="text" id="search" placeholder="Search products..." />
-        <select id="category">
-      <option value="all">All Categories</option>
-      <option value="electronics">Electronics</option>
-      <option value="fashion">Fashion</option>
-      <option value="home">Home</option>
-    </select>
-        <label>
-      Max Price: <span id="price-value">1000</span>$
-    </label>
-        <input type="range" id="price" min="10" max="1000" value="1000" />
-    </div>
-
-    <div class="product-grid" id="productGrid"></div>
-
+<body class="min-h-full bg-gradient-to-br from-slate-50 to-blue-50">
+    <main class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 id="catalog-title" class="text-4xl font-bold text-slate-800 mb-4">Premium Product Catalog</h1>
+            <p id="subtitle-text" class="text-lg text-slate-600 max-w-2xl mx-auto">Discover our curated collection of high-quality products</p>
+        </header>
+        <!-- Filters -->
+        <section class="mb-8">
+            <div class="flex flex-wrap justify-center gap-3 mb-6"><button class="filter-button active px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-all duration-200" data-filter="all"> All Products </button> <button class="filter-button px-6 py-3 bg-white text-slate-700 rounded-full font-medium hover:bg-slate-50 border border-slate-200 transition-all duration-200"
+                    data-filter="electronics"> Electronics </button> <button class="filter-button px-6 py-3 bg-white text-slate-700 rounded-full font-medium hover:bg-slate-50 border border-slate-200 transition-all duration-200" data-filter="clothing"> Clothing </button>                <button class="filter-button px-6 py-3 bg-white text-slate-700 rounded-full font-medium hover:bg-slate-50 border border-slate-200 transition-all duration-200" data-filter="home"> Home &amp; Garden </button> <button class="filter-button px-6 py-3 bg-white text-slate-700 rounded-full font-medium hover:bg-slate-50 border border-slate-200 transition-all duration-200"
+                    data-filter="books"> Books </button>
+            </div>
+            <!-- Search Bar -->
+            <div class="max-w-md mx-auto">
+                <div class="relative"><input type="text" id="search-input" placeholder="Search products..." class="w-full px-4 py-3 pl-12 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <svg class="absolute left-4 top-3.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+                </div>
+            </div>
+        </section>
+        <!-- Products Grid -->
+        <section id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Products will be dynamically inserted here -->
+        </section>
+        <!-- No Results Message -->
+        <div id="no-results" class="hidden text-center py-12">
+            <div class="text-slate-400 mb-4">
+                <svg class="mx-auto h-16 w-16" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.467-.881-6.08-2.33M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+     </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-slate-600 mb-2">No products found</h3>
+            <p class="text-slate-500">Try adjusting your search or filter criteria</p>
+        </div>
+    </main>
     <script>
+        // Sample product data
         const products = [{
             id: 1,
             name: "Wireless Headphones",
             category: "electronics",
-            price: 199,
-            img: "https://via.placeholder.com/250x200?text=Headphones"
+            price: "$199",
+            image: "🎧",
+            description: "Premium wireless headphones with noise cancellation"
         }, {
             id: 2,
-            name: "Smart Watch",
-            category: "electronics",
-            price: 299,
-            img: "https://via.placeholder.com/250x200?text=Smart+Watch"
+            name: "Cotton T-Shirt",
+            category: "clothing",
+            price: "$29",
+            image: "👕",
+            description: "Comfortable 100% organic cotton t-shirt"
         }, {
             id: 3,
-            name: "T-Shirt",
-            category: "fashion",
-            price: 25,
-            img: "https://via.placeholder.com/250x200?text=T-Shirt"
+            name: "Smart Watch",
+            category: "electronics",
+            price: "$299",
+            image: "⌚",
+            description: "Advanced fitness tracking and notifications"
         }, {
             id: 4,
-            name: "Sneakers",
-            category: "fashion",
-            price: 80,
-            img: "https://via.placeholder.com/250x200?text=Sneakers"
+            name: "Garden Planter",
+            category: "home",
+            price: "$45",
+            image: "🪴",
+            description: "Beautiful ceramic planter for indoor plants"
         }, {
             id: 5,
-            name: "Sofa Set",
-            category: "home",
-            price: 850,
-            img: "https://via.placeholder.com/250x200?text=Sofa"
+            name: "Programming Guide",
+            category: "books",
+            price: "$39",
+            image: "📚",
+            description: "Complete guide to modern web development"
         }, {
             id: 6,
-            name: "Coffee Maker",
-            category: "home",
-            price: 120,
-            img: "https://via.placeholder.com/250x200?text=Coffee+Maker"
-        }, {
-            id: 7,
-            name: "Jeans",
-            category: "fashion",
-            price: 60,
-            img: "https://via.placeholder.com/250x200?text=Jeans"
-        }, {
-            id: 8,
             name: "Bluetooth Speaker",
             category: "electronics",
-            price: 150,
-            img: "https://via.placeholder.com/250x200?text=Speaker"
-        }, ];
+            price: "$89",
+            image: "🔊",
+            description: "Portable speaker with rich, clear sound"
+        }, {
+            id: 7,
+            name: "Denim Jacket",
+            category: "clothing",
+            price: "$79",
+            image: "🧥",
+            description: "Classic denim jacket with modern fit"
+        }, {
+            id: 8,
+            name: "Coffee Maker",
+            category: "home",
+            price: "$129",
+            image: "☕",
+            description: "Programmable coffee maker with thermal carafe"
+        }, {
+            id: 9,
+            name: "Design Handbook",
+            category: "books",
+            price: "$49",
+            image: "📖",
+            description: "Essential principles of modern design"
+        }, {
+            id: 10,
+            name: "Running Shoes",
+            category: "clothing",
+            price: "$119",
+            image: "👟",
+            description: "Lightweight running shoes with superior comfort"
+        }, {
+            id: 11,
+            name: "Tablet",
+            category: "electronics",
+            price: "$399",
+            image: "📱",
+            description: "10-inch tablet perfect for work and entertainment"
+        }, {
+            id: 12,
+            name: "Throw Pillow",
+            category: "home",
+            price: "$25",
+            image: "🛏️",
+            description: "Soft decorative pillow in multiple colors"
+        }];
 
-        const productGrid = document.getElementById("productGrid");
-        const searchInput = document.getElementById("search");
-        const categorySelect = document.getElementById("category");
-        const priceRange = document.getElementById("price");
-        const priceValue = document.getElementById("price-value");
+        let currentFilter = 'all';
+        let currentSearch = '';
 
-        function displayProducts(items) {
-            productGrid.innerHTML = items.map(item => `
-        <div class="product-card">
-          <img src="${item.img}" alt="${item.name}">
-          <div class="product-info">
-            <h3>${item.name}</h3>
-            <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)}</p>
-            <p class="price">$${item.price}</p>
-          </div>
-        </div>
-      `).join('');
+        // Default configuration
+        const defaultConfig = {
+            catalog_title: "Premium Product Catalog",
+            subtitle_text: "Discover our curated collection of high-quality products"
+        };
+
+        // Initialize the Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange: async(config) => {
+                    document.getElementById('catalog-title').textContent = config.catalog_title || defaultConfig.catalog_title;
+                    document.getElementById('subtitle-text').textContent = config.subtitle_text || defaultConfig.subtitle_text;
+                },
+                mapToCapabilities: (config) => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["catalog_title", config.catalog_title || defaultConfig.catalog_title],
+                    ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text]
+                ])
+            });
         }
 
-        function filterProducts() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const category = categorySelect.value;
-            const maxPrice = parseInt(priceRange.value);
-
-            const filtered = products.filter(p =>
-                (category === "all" || p.category === category) &&
-                p.price <= maxPrice &&
-                p.name.toLowerCase().includes(searchTerm)
-            );
-
-            displayProducts(filtered);
+        // Create product card HTML
+        function createProductCard(product) {
+            return `
+                <div class="product-card bg-white rounded-xl shadow-md overflow-hidden fade-in" data-category="${product.category}" data-name="${product.name.toLowerCase()}">
+                    <div class="p-6">
+                        <div class="text-center mb-4">
+                            <div class="text-6xl mb-3">${product.image}</div>
+                            <h3 class="text-xl font-semibold text-slate-800 mb-2">${product.name}</h3>
+                            <p class="text-slate-600 text-sm mb-3">${product.description}</p>
+                            <div class="text-2xl font-bold text-blue-600 mb-4">${product.price}</div>
+                        </div>
+                        <button class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
-        searchInput.addEventListener("input", filterProducts);
-        categorySelect.addEventListener("change", filterProducts);
-        priceRange.addEventListener("input", () => {
-            priceValue.textContent = priceRange.value;
-            filterProducts();
+        // Filter and display products
+        function displayProducts() {
+            const grid = document.getElementById('products-grid');
+            const noResults = document.getElementById('no-results');
+
+            let filteredProducts = products;
+
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(product => product.category === currentFilter);
+            }
+
+            // Apply search filter
+            if (currentSearch) {
+                filteredProducts = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                    product.description.toLowerCase().includes(currentSearch.toLowerCase())
+                );
+            }
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                grid.innerHTML = filteredProducts.map(createProductCard).join('');
+            }
+        }
+
+        // Handle filter button clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-button')) {
+                // Update active state
+                document.querySelectorAll('.filter-button').forEach(btn => {
+                    btn.classList.remove('active', 'bg-blue-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-200');
+                });
+
+                e.target.classList.add('active', 'bg-blue-600', 'text-white');
+                e.target.classList.remove('bg-white', 'text-slate-700', 'border', 'border-slate-200');
+
+                currentFilter = e.target.dataset.filter;
+                displayProducts();
+            }
         });
 
-        // Initialize
-        displayProducts(products);
-    </script>
+        // Handle search input
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            displayProducts();
+        });
 
+        // Handle add to cart buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.textContent === 'Add to Cart') {
+                e.target.textContent = 'Added!';
+                e.target.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                e.target.classList.add('bg-green-600');
+
+                setTimeout(() => {
+                    e.target.textContent = 'Add to Cart';
+                    e.target.classList.remove('bg-green-600');
+                    e.target.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                }, 2000);
+            }
+        });
+
+        // Initial display
+        displayProducts();
+    </script>
+    <script>
+        (function() {
+            function c() {
+                var b = a.contentDocument || a.contentWindow.document;
+                if (b) {
+                    var d = b.createElement('script');
+                    d.innerHTML = "window.__CF$cv$params={r:'9957bdde274b99c7',t:'MTc2MTYyNjI4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                    b.getElementsByTagName('head')[0].appendChild(d)
+                }
+            }
+            if (document.body) {
+                var a = document.createElement('iframe');
+                a.height = 1;
+                a.width = 1;
+                a.style.position = 'absolute';
+                a.style.top = 0;
+                a.style.left = 0;
+                a.style.border = 'none';
+                a.style.visibility = 'hidden';
+                document.body.appendChild(a);
+                if ('loading' !== document.readyState) c();
+                else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+                else {
+                    var e = document.onreadystatechange || function() {};
+                    document.onreadystatechange = function(b) {
+                        e(b);
+                        'loading' !== document.readyState && (document.onreadystatechange = e, c())
+                    }
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>
